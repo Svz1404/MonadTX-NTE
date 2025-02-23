@@ -1,39 +1,11 @@
 import { ethers } from "ethers";
 import ora from "ora";
-import readline from "readline";
+import readlineSync from "readline-sync";
 import cfonts from "cfonts";
 
 const RPC_URL = "https://testnet-rpc.monad.xyz";
 const ROUTER_ADDRESS = "0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701";
 const ROUTER_ABI = ["function deposit() payable"];
-
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-  terminal: true,
-});
-
-function askQuestion(query, hidden = false) {
-  return new Promise((resolve) => {
-    if (!hidden) {
-      rl.question(query, resolve);
-    } else {
-      process.stdout.write(query);
-      rl.input.setRawMode(true);
-      let input = "";
-      rl.input.on("data", (char) => {
-        char = char.toString();
-        if (char === "\n" || char === "\r" || char === "\x04") {
-          rl.input.setRawMode(false);
-          console.log("\n[Private Key Entered]\");
-          resolve(input);
-        } else {
-          input += char;
-        }
-      });
-    }
-  });
-}
 
 async function wrapMON(wallet, index, total) {
   const router = new ethers.Contract(ROUTER_ADDRESS, ROUTER_ABI, wallet);
@@ -71,13 +43,13 @@ async function main() {
 
   console.log("=== Telegram Channel🚀 : NT Exhaust (@NTExhaust) ===", "\x1b[36m");
 
-  const privateKey = await askQuestion("Enter your private key: ", true);
+  const privateKey = readlineSync.question("Enter your private key: ", { hideEchoBack: true });
+  console.log("\n[Private Key Entered: ********]");
   const provider = new ethers.JsonRpcProvider(RPC_URL);
   const wallet = new ethers.Wallet(privateKey, provider);
 
-  const loopCount = await askQuestion("How many times should the script run before pausing? ");
-  const waitTime = await askQuestion("How long should the script wait before restarting? (Enter time in minutes) ");
-  rl.close();
+  const loopCount = readlineSync.question("How many times should the script run before pausing? ");
+  const waitTime = readlineSync.question("How long should the script wait before restarting? (Enter time in minutes) ");
 
   const waitMilliseconds = parseInt(waitTime) * 60 * 1000;
 
