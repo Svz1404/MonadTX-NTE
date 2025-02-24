@@ -155,7 +155,9 @@ async function main() {
     console.log(`\n🚀 Starting batch of ${loopCount} transactions...\n`);
 
     for (let i = 1; i <= parseInt(loopCount); i++) {
+      try{
       await wrapMON(i, loopCount, wallet);
+      }catch{}
     }
 
     console.log(`\n⏳ Waiting ${waitTime} minutes before starting the next batch...\n`);
