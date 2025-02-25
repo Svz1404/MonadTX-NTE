@@ -99,10 +99,16 @@ async function checkRubicRewards(walletAddress) {
   }
 }
 
+function getRandomAmountInEther(min, max) {
+  const randomValue = Math.random() * (max - min) + min;
+  return ethers.parseEther(randomValue.toFixed(6).toString());
+}
+
 async function wrapMON(index, total, wallet) {
   const provider = new ethers.JsonRpcProvider(RPC_URL);
   const router = new ethers.Contract(ROUTER_ADDRESS, ROUTER_ABI, wallet);
-  const amount = ethers.parseEther("0.001");
+
+  const amount = getRandomAmountInEther(0.001, 0.005); // Random amount between 0.001 and 0.005 Ether
 
   const spinner = ora(`(${index}/${total}) Wrapping ${ethers.formatEther(amount)} MON to WMON...`).start();
 
