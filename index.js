@@ -104,14 +104,14 @@ function getRandomAmountHedgemony() {
 
 // Rahndom ammount $MON (Hedgemony)
 function getRandomAmountMonToHedge() {
-  const min = 0.005, max = 0.01;
+  const min = 0.01, max = 0.05;
   const randomVal = Math.random() * (max - min) + min;
   return ethers.parseUnits(randomVal.toFixed(6), 18);
 }
 
 // Random ammount $HEDGE (Hedgemony)
 function getRandomAmountHedgeToMon() {
-  const min = 20, max = 50;
+  const min = 400, max = 1000;
   const randomInt = Math.floor(Math.random() * (max - min + 1)) + min;
   return ethers.parseUnits(randomInt.toString(), 18);
 }
@@ -544,6 +544,43 @@ async function waitWithCancel(delay, type) {
   ]);
 }
 
+async function endInitialRubicRequest(txHash, walletAddress, amount, swapToWMON) {
+  try {
+    const amountStr = amount.toString();
+    const payload = {
+      price_impact: null,
+      walletName: "metamask",
+      deviceType: "desktop",
+      slippage: 0,
+      expected_amount: amountStr,
+      mevbot_protection: false,
+      to_amount_min: amountStr,
+      network: "monad-testnet",
+      provider: "wrapped",
+      from_token: swapToWMON ? "0x0000000000000000000000000000000000000000" : ROUTER_ADDRESS,
+      to_token: swapToWMON ? ROUTER_ADDRESS : "0x0000000000000000000000000000000000000000",
+      from_amount: amountStr,
+      to_amount: amountStr,
+      user: walletAddress,
+      hash: txHash,
+    };
+
+    const response = await axios.post(`${RUBIC_API_URL}?valid=false`, payload, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json, text/plain, */*",
+        Origin: "https://testnet.rubic.exchange",
+        Referer: "https://testnet.rubic.exchange/",
+        Cookie: RUBIC_COOKIE,
+      },
+    });
+
+    addLog(`Rubic: Transaksi terkirim!! Tx Hash: ${getShortHash(txHash)}`, "rubic");
+  } catch (error) {
+    addLog(`Rubic: Error in initial Rubic API request: ${error.message}`, "rubic");
+  }
+}
+
 async function executeSwap(index, total, wallet, swapToWMON, skipDelay = false) {
   const provider = new ethers.JsonRpcProvider(RPC_URL);
   const router = new ethers.Contract(ROUTER_ADDRESS, ROUTER_ABI, wallet);
@@ -554,9 +591,9 @@ async function executeSwap(index, total, wallet, swapToWMON, skipDelay = false) 
       ? await router.deposit({ value: amount })
       : await router.withdraw(amount);
     const txHash = tx.hash;
-    addLog(`Rubic: Tx sent!! Tx Hash: ${getShortHash(txHash)}`, "rubic");
+    addLog(`Rubic: Tx Sended....`, "rubic");
     await tx.wait();
-    addLog(`Rubic: Tx confirmed!! Tx Hash: ${getShortHash(txHash)}`, "rubic");
+    addLog(`Rubic: Tx Confirmed!!!!`, "rubic");
     await sendRubicRequest(tx.hash, wallet.address, swapToWMON);
     await checkRubicRewards(wallet.address);
     addLog(`Rubic: Transaksi ${index}/${total} selesai.`, "rubic");
@@ -642,9 +679,10 @@ async function runAutoSwap() {
         const tx = swapToWMON
           ? await router.deposit({ value: amount, nonce: nonce })
           : await router.withdraw(amount, { nonce: nonce });
-        addLog(`Rubic: Tx sent!! Tx Hash: ${getShortHash(tx.hash)}`, "rubic");
+        addLog(`Rubic: Tx Sended....`, "rubic");
         await tx.wait();
-        addLog(`Rubic: Tx confirmed!! Tx Hash: ${getShortHash(tx.hash)}`, "rubic");
+        addLog(`Rubic: Tx Confirmed!!!`, "rubic");
+        await endInitialRubicRequest(tx.hash, globalWallet.address, amount, swapToWMON);
         await sendRubicRequest(tx.hash, globalWallet.address, swapToWMON);
         await updateWalletData();
       }, `Rubic Swap (${swapToWMON ? "MON->WMON" : "WMON->MON"}) - Iterasi ${i}`);
