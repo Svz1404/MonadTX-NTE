@@ -1,19 +1,21 @@
 {
-  "name": "monad",
+  "name": "NT Exhaust - Monad Auto Swap",
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+    "start": "node index.js"
+  }, 
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "axios": "^1.8.3",
+    "blessed": "^0.1.81",
     "cfonts": "^3.3.0",
     "dotenv": "^16.4.7",
     "ethers": "^6.13.5",
-    "ora": "^8.2.0"
+    "figlet": "^1.8.0"
   }
 }
