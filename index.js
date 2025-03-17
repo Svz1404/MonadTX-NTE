@@ -684,6 +684,7 @@ async function runAutoSwap() {
         addLog(`Rubic: Tx Confirmed!!!`, "rubic");
         await endInitialRubicRequest(tx.hash, globalWallet.address, amount, swapToWMON);
         await sendRubicRequest(tx.hash, globalWallet.address, swapToWMON);
+        await checkRubicRewards(globalWallet.address);
         await updateWalletData();
       }, `Rubic Swap (${swapToWMON ? "MON->WMON" : "WMON->MON"}) - Iterasi ${i}`);
       swapToWMON = !swapToWMON;
