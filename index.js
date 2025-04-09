@@ -317,6 +317,7 @@ const logsBox = blessed.box({
 const walletBox = blessed.box({
   label: " Informasi Wallet ",
   left: "60%",
+  tags: true,
   border: { type: "line" },
   style: { border: { fg: "magenta" }, fg: "white", bg: "default", align: "left", valign: "top" },
   content: ""
@@ -332,30 +333,26 @@ function updateWallet() {
   };
 
   const mon   = walletInfo.balanceMON ? formatBalance(walletInfo.balanceMON) : "0.00";
-  const pepe  = walletInfo.balancePEPE ? formatBalance(walletInfo.balancePEPE) : "0.00";
   const wmon  = walletInfo.balanceWMON ? formatBalance(walletInfo.balanceWMON) : "0.00";
-  const myk   = walletInfo.balanceMYK ? formatBalance(walletInfo.balanceMYK) : "0.00";
   const hedge = walletInfo.balanceHEDGE ? formatBalance(walletInfo.balanceHEDGE) : "0.00";
-  const mldk  = walletInfo.balanceMLDK ? formatBalance(walletInfo.balanceMLDK) : "0.00";
   const weth  = walletInfo.balanceWETH ? formatBalance(walletInfo.balanceWETH) : "0.00";
   const usdt  = walletInfo.balanceUSDT ? formatBalance(walletInfo.balanceUSDT) : "0.00";
   const usdc  = walletInfo.balanceUSDC ? formatBalance(walletInfo.balanceUSDC) : "0.00";
   const network = walletInfo.network || "Unknown";
 
-  const content = 
-`              address: ${shortAddress}
-MON  : ${mon}                           PEPE: ${pepe}
-WMON : ${wmon}                           MYK : ${myk}
-HEDGE: ${hedge}                        MLDK: ${mldk}
-WETH : ${weth}                           USDT: ${usdt}
-USDC : ${usdc}
-              Network: ${network}`;
-  
+  const content = `Address : {bold}{bright-cyan-fg}${shortAddress}{/bright-cyan-fg}{/bold}
+└── Network : {bold}{bright-yellow-fg}${network}{/bright-yellow-fg}{/bold}
+    ├── MON   : {bold}{bright-green-fg}${mon}{/bright-green-fg}{/bold}
+    ├── WMON  : {bold}{bright-green-fg}${wmon}{/bright-green-fg}{/bold}
+    ├── HEDGE : {bold}{bright-green-fg}${hedge}{/bright-green-fg}{/bold}
+    ├── WETH  : {bold}{bright-green-fg}${weth}{/bright-green-fg}{/bold}
+    ├── USDC  : {bold}{bright-green-fg}${usdc}{/bright-green-fg}{/bold}
+    └── USDT  : {bold}{bright-green-fg}${usdt}{/bright-green-fg}{/bold}
+`;
+
   walletBox.setContent(content);
   safeRender();
 }
-
-
 
 function stopAllTransactions() {
   if (autoSwapRunning || tayaSwapRunning || hedgemonySwapRunning || mondaSwapRunning) {
@@ -733,9 +730,6 @@ async function updateWalletData() {
       balanceHEDGE,
       balanceWETH,
       balanceUSDC,
-      balancePEPE,
-      balanceMYK,
-      balanceMLDK,
       balanceUSDT
     ] = await Promise.all([
       provider.getBalance(wallet.address),
@@ -743,9 +737,6 @@ async function updateWalletData() {
       new ethers.Contract(HEDGE_ADDRESS, ERC20_ABI, provider).balanceOf(wallet.address),
       new ethers.Contract(WETH_ADDRESS, ERC20_ABI, provider).balanceOf(wallet.address),
       new ethers.Contract(USDC_ADDRESS, ERC20_ABI, provider).balanceOf(wallet.address),
-      new ethers.Contract(TOKEN_PEPE, ERC20_ABI, provider).balanceOf(wallet.address),
-      new ethers.Contract(TOKEN_MYK, ERC20_ABI, provider).balanceOf(wallet.address),
-      new ethers.Contract(TOKEN_MLDK, ERC20_ABI, provider).balanceOf(wallet.address),
       new ethers.Contract(USDT_ADDRESS_MONDA, ERC20_ABI, provider).balanceOf(wallet.address)
     ]);
 
@@ -755,9 +746,6 @@ async function updateWalletData() {
     walletInfo.balanceWETH  = ethers.formatEther(balanceWETH);
     walletInfo.balanceUSDC  = ethers.formatUnits(balanceUSDC, 6);
     walletInfo.balanceUSDT  = ethers.formatUnits(balanceUSDT, 6);
-    walletInfo.balancePEPE  = ethers.formatEther(balancePEPE);
-    walletInfo.balanceMYK   = ethers.formatEther(balanceMYK);
-    walletInfo.balanceMLDK  = ethers.formatEther(balanceMLDK);
 
     updateWallet();
     addLog("Saldo & Wallet Updated !!", "system");
